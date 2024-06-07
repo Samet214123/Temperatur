@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slut Temperatur Beräknare</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            color: #333;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+        }
+        .object {
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+        }
+        .object:last-child {
+            border-bottom: none;
+        }
+        .input-group {
+            margin-bottom: 10px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        input[type="number"] {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            display: block;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            margin-bottom: 20px; /* Added margin-bottom for spacing */
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: #333;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Slut Temperatur Beräknare</h1>
+    <div class="container">
+        <div id="objects-container">
+            <div class="object" id="object1">
+                <h3>Föremål 1</h3>
+                <div class="input-group">
+                    <label for="massa1">Massa i kg:</label>
+                    <input type="number" id="massa1" step="any">
+                </div>
+                <div class="input-group">
+                    <label for="värmekapacitet1">Specifik värmekapacitet i J/kg*K:</label>
+                    <input type="number" id="värmekapacitet1" step="any">
+                </div>
+                <div class="input-group">
+                    <label for="temperatur1">Temperatur i Celsius:</label>
+                    <input type="number" id="temperatur1" step="any">
+                </div>
+            </div>
+            <div class="object" id="object2">
+                <h3>Föremål 2</h3>
+                <div class="input-group">
+                    <label for="massa2">Massa i kg:</label>
+                    <input type="number" id="massa2" step="any">
+                </div>
+                <div class="input-group">
+                    <label for="värmekapacitet2">Specifik värmekapacitet i J/kg*K:</label>
+                    <input type="number" id="värmekapacitet2" step="any">
+                </div>
+                <div class="input-group">
+                    <label for="temperatur2">Temperatur i Celsius:</label>
+                    <input type="number" id="temperatur2" step="any">
+                </div>
+            </div>
+        </div>
+        <div class="button-group">
+            <button onclick="addObject()">Lägg till föremål</button>
+            <input type="number" id="remove-object-number" placeholder="Nummer att ta bort" style="width: 160px;">
+            <button onclick="removeObject()">Ta bort föremål</button>
+        </div>
+        <div class="input-group">
+            <label for="totalenergy">Energi från omgivningen (J):</label>
+            <input type="number" id="totalenergy" step="any" style="margin-bottom: 20px;"> <!-- Added margin-bottom for spacing -->
+        </div>
+        <button onclick="calculateFinalTemperature()">Beräkna slut temperatur</button>
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        let objectCount = 2; // Starting with 2 objects
+
+        function addObject() {
+            objectCount++;
+            createObject(objectCount);
+        }
+
+        function createObject(number) {
+            const container = document.getElementById('objects-container');
+            const objectDiv = document.createElement('div');
+            objectDiv.className = 'object';
+            objectDiv.id = `object${number}`;
+            objectDiv.innerHTML = `
+                <h3>Föremål ${number}</h3>
+                <div class="input-group">
+                    <label for="massa${number}">Massa i kg:</label>
+                    <input type="number" id="massa${number}" step="any">
+                </div>
+                <div class="input-group">
+                    <label for="värmekapacitet${number}">Specifik värmekapacitet i J/kg*K:</label>
+                    <input type="number" id="värmekapacitet${number}" step="any">
+                </div>
+                <div class="input-group">
+                    <label for="temperatur${number}">Temperatur i Celsius:</label>
+                    <input type="number" id="temperatur${number}" step="any">
+                </div>
+            `;
+            container.appendChild(objectDiv);
+        }
+
+        function removeObject() {
+            const objectNumber = parseInt(document.getElementById('remove-object-number').value);
+            if (objectNumber > 0 && objectNumber <= objectCount && document.getElementById(`object${objectNumber}`) && objectCount > 2) {
+                const objectDiv = document.getElementById(`object${objectNumber}`);
+                if (objectDiv) {
+                    objectDiv.remove();
+                    objectCount--;
+                    updateObjectIds(objectNumber);
+                }
+            }
+        }
+
+        function updateObjectIds(startIndex) {
+            for (let i = startIndex + 1; i <= objectCount + 1; i++) {
+                const currentObject = document.getElementById(`object${i}`);
+                if (currentObject) {
+                    const newIndex = i - 1;
+                    currentObject.id = `object${newIndex}`;
+                    currentObject.querySelector('h3').innerText = `Föremål ${newIndex}`;
+                    currentObject.querySelector(`label[for="massa${i}"]`).setAttribute('for', `massa${newIndex}`);
+                    currentObject.querySelector(`#massa${i}`).id = `massa${newIndex}`;
+                    currentObject.querySelector(`label[for="värmekapacitet${i}"]`).setAttribute('for', `värmekapacitet${newIndex}`);
+                    currentObject.querySelector(`#värmekapacitet${i}`).id = `värmekapacitet${newIndex}`;
+                    currentObject.querySelector(`label[for="temperatur${i}"]`).setAttribute('for', `temperatur${newIndex}`);
+                    currentObject.querySelector(`#temperatur${i}`).id = `temperatur${newIndex}`;
+                }
+            }
+        }
+
+        function calculateFinalTemperature() {
+            const totalenergy = parseFloat(document.getElementById('totalenergy').value);
+            let massaLista = [];
+            let värmekapacitetLista = [];
+            let temperaturLista = [];
+            
+            for (let i = 1; i <= objectCount; i++) {
+                const objectDiv = document.getElementById(`object${i}`);
+                if (objectDiv) {
+                    const massa = parseFloat(document.getElementById(`massa${i}`).value);
+                    const värmekapacitet = parseFloat(document.getElementById(`värmekapacitet${i}`).value);
+                    let temperatur = parseFloat(document.getElementById(`temperatur${i}`).value) + 273.15;
+
+                    massaLista.push(massa);
+                    värmekapacitetLista.push(värmekapacitet);
+                    temperaturLista.push(temperatur);
+                }
+            }
+
+            let totalEnergy = totalenergy;
+            let denominator = 0;
+
+            for (let i = 0; i < massaLista.length; i++) {
+                totalEnergy += massaLista[i] * värmekapacitetLista[i] * temperaturLista[i];
+            }
+
+            for (let i = 0; i < massaLista.length; i++) {
+                denominator += massaLista[i] * värmekapacitetLista[i];
+            }
+
+            let finalTemperature = totalEnergy / denominator;
+            finalTemperature -= 273.15;
+
+            document.getElementById('result').innerText = `Sluttemperatur: ${finalTemperature.toFixed(2)} C°`;
+        }
+    </script>
+</body>
+</html>
